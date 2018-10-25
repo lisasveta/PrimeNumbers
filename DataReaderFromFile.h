@@ -7,6 +7,7 @@ class DataReaderFromFile :
 	void parseIntervalsFromFile();
 
 public:
+
 	DataReaderFromFile(const char * pFileName);
 	~DataReaderFromFile();
 

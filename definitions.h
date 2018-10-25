@@ -5,4 +5,4 @@ struct Interval
 	int m_nEnd;
 };
 
-enum FileErrors {WRITE_OK, READ_OK, FILE_NOT_EXIST};
+enum FileError {WRITE_OK, READ_OK, FILE_NOT_EXIST, FILE_IS_EMPTY};

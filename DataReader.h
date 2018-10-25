@@ -3,6 +3,7 @@
 #include <vector>
 class DataReader
 {
+protected:
 	std::vector <Interval> m_Intervals;
 	
 public:

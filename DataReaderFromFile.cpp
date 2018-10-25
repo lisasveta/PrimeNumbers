@@ -17,20 +17,31 @@ DataReaderFromFile::DataReaderFromFile(const char * pFileName)
 			fseek(pFile, 0L, SEEK_SET);
 
 			try {
-				pData = new char[fileSize]; // + 1 for 0
+				pData = new char[fileSize]; // + 1 for 0 (EOF)?
 				size_t nSize = fread_s(pData, fileSize, sizeof(char), fileSize, pFile);
-				//to do: check readed data size and all amount of data
+				
+				//check real size of readed data
+				if (nSize < fileSize)
+				{
+					int nRemainingSize;
+					int nPortionSize = 0;
+					do
+					{
+						nRemainingSize = fileSize - nSize;
+						nPortionSize = fread_s(pData + nSize, nRemainingSize, sizeof(char), nRemainingSize, pFile);
+						nSize += nPortionSize;
+					} while (nSize < fileSize);
+				}
+
 				if (nSize > 0)
 				{
-					//call function for parsing data from file
-					parseIntervalsFromData();
+					parseIntervalsFromFile();
 				}
 			}
 			catch (const std::bad_alloc& e)
 			{
 				std::cout << "Allocation failed: " << e.what() << '\n';
 			}
-			//to do : create while circle for reading in portions
 		}
 		fclose(pFile);
 	}
@@ -44,7 +55,7 @@ DataReaderFromFile::~DataReaderFromFile()
 }
 
 
-void DataReaderFromFile::parseIntervalsFromData()
+void DataReaderFromFile::parseIntervalsFromFile()
 {
 	int nCounter = 0;
 	char *pInterval = pData;

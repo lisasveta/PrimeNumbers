@@ -4,9 +4,7 @@ class DataReaderFromFile :
 	public DataReader
 {
 	char *pData;
-	std::vector <Interval> m_Intervals;
-	void parseIntervalsFromData();
-
+	void parseIntervalsFromFile();
 
 public:
 	DataReaderFromFile(const char * pFileName);

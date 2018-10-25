@@ -9,7 +9,7 @@ DataReader::DataReader()
 
 DataReader::~DataReader()
 {
-	std::cout << "DataReader::~DataReader() " << std::endl;
+	
 }
 
 std::vector <Interval> DataReader::getIntervals()

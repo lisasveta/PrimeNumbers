@@ -39,7 +39,6 @@ DataReaderFromFile::DataReaderFromFile(const char * pFileName)
 
 DataReaderFromFile::~DataReaderFromFile()
 {
-	std::cout << "DataReaderFromFile::~DataReaderFromFile() " << std::endl;
 	if (pData != nullptr)
 		delete[] pData;
 }

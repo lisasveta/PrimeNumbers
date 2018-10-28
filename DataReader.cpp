@@ -3,7 +3,7 @@
 #include <iostream>
 #include <cstdio>
 
-DataReader::DataReader()
+DataReader::DataReader():m_readStatus(ErrCode::READ_OK)
 {
 }
 
@@ -12,7 +12,13 @@ DataReader::~DataReader()
 	
 }
 
-std::vector <Interval> DataReader::getIntervals()
+
+size_t DataReader::dataSize()
 {
-	return m_Intervals;
+	return m_Intervals.size();
+}
+
+ErrCode DataReader::getReadingDataStatus()
+{
+	return m_readStatus;
 }

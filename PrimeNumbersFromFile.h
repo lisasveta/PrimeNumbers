@@ -20,8 +20,8 @@ class PrimeNumbersFromFile
 	};
 
 	std::set<int> m_primeNumbers;
-	DataReader *p_mReader;
-	DataSaver *p_mSaver;
+	DataReader *m_pReader;
+	DataSaver *m_pSaver;
 
 	void addNumbersFromIntervals(std::vector<Interval> vc);
 	static bool isThisPrimeNumber(int num);
@@ -32,8 +32,9 @@ public:
 	PrimeNumbersFromFile();
 	~PrimeNumbersFromFile();
 
-	void getDataFromFile(const char *pFileName);
+	ErrCode getDataFromFile(const char *pFileName);
 	void showNumbers();
-	void saveToFile(const char *pFileName);
+	ErrCode saveToFile(const char *pFileName);
+	
 };
 

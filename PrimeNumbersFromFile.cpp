@@ -91,20 +91,28 @@ DWORD PrimeNumbersFromFile::threadFunct(LPVOID lpParam)
 	return 0;
 }
 
-void PrimeNumbersFromFile::getDataFromFile(const char *pFileName)
+ErrCode PrimeNumbersFromFile::getDataFromFile(const char *pFileName)
 {
+	
+	ErrCode err = ErrCode::READ_OK;
 	try {
-		p_mReader = new DataReaderFromFile(pFileName);
+		m_pReader = new DataReaderFromFile(pFileName);
 
-		std::vector<Interval> intervals = p_mReader->getIntervals();
-		addNumbersFromIntervals(intervals);
+		if (m_pReader->dataSize() > 0)
+		{
+			std::vector<Interval> intervals = m_pReader->getIntervals();
+			addNumbersFromIntervals(intervals);
+		}
+		else
+			err = m_pReader->getReadingDataStatus();
 
-		delete p_mReader;
+		delete m_pReader;
 	}
 	catch (const std::bad_alloc& e)
 	{
 		std::cout << "Allocation failed: " << e.what() << '\n';
 	}
+	return err;
 }
 
 void PrimeNumbersFromFile::showNumbers()
@@ -117,12 +125,16 @@ void PrimeNumbersFromFile::showNumbers()
 	std::cout << std::endl;
 }
 
-void PrimeNumbersFromFile::saveToFile(const char *pFileName)
+ErrCode PrimeNumbersFromFile::saveToFile(const char *pFileName)
 {
-	p_mSaver = new DataSaverToFile;
-	if (nullptr != p_mSaver)
+	ErrCode er = ErrCode::WRITE_OK;
+	m_pSaver = new DataSaverToFile;
+	if (nullptr != m_pSaver)
 	{
-		FileErrors er = p_mSaver->saveData(pFileName, m_primeNumbers);
-		delete p_mSaver;
+		er = m_pSaver->saveData(pFileName, m_primeNumbers);
+		delete m_pSaver;
 	}
+
+	return er;
 }
+

@@ -3,8 +3,11 @@
 class DataReaderFromFile :
 	public DataReader
 {
+	const char *m_pFileName;
 	char *pData;
+
 	void parseIntervalsFromFile();
+	
 
 public:
 
@@ -12,5 +15,6 @@ public:
 	~DataReaderFromFile();
 
 	virtual std::vector <Interval> getIntervals();
+	virtual ErrCode readData();
 };
 

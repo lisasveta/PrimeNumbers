@@ -7,6 +7,6 @@ public:
 	DataSaverToFile();
 	~DataSaverToFile();
 
-	virtual FileErrors saveData(const char * pFileName, std::set<int> numbers);
+	virtual ErrCode saveData(const char * pFileName, std::set<int> numbers);
 };
 

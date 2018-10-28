@@ -8,7 +8,6 @@ public:
 	DataSaver();
 	~DataSaver();
 
-	//to do: return  error code
-	virtual FileErrors saveData(const char * pFileName, std::set<int> numbers) = 0;
+	virtual ErrCode saveData(const char * pFileName, std::set<int> numbers) = 0;
 };
 

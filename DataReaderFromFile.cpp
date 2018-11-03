@@ -2,56 +2,58 @@
 #include "DataReaderFromFile.h"
 #include <iostream>
 
-DataReaderFromFile::DataReaderFromFile(const char * pFileName):m_pFileName(pFileName), pData(0)
+DataReaderFromFile::DataReaderFromFile(const std::string fileName):m_fileName(fileName)
 {
-	m_readStatus = readData(); // How I may use returned err code?
+
 }
 
 DataReaderFromFile::~DataReaderFromFile()
 {
-	if (pData != nullptr)
-		delete[] pData;
+
 }
 
 
 void DataReaderFromFile::parseIntervalsFromFile()
 {
-	int nCounter = 0;
-	char *pInterval = pData;
-	char *pLow, *pHigh;
-	int nBeg, nEnd;
+	int nBeg(0), nEnd(0);
 
-	while (pInterval = std::strstr(pInterval, "<interval>"))
+	size_t pos = m_Data.find("<interval>"), posLow(0), posHigh(0);
+	while (pos > 0)
 	{
-		pLow = std::strstr(pInterval, "<low>");
-		pLow += 5;
-		nBeg = std::atoi(pLow);
-		pHigh = std::strstr(pInterval, "<high>");
-		pHigh += 6;
-		nEnd = std::atoi(pHigh);
+		posLow = m_Data.find("<low>", pos);
+		nBeg = std::atoi(m_Data.data() + posLow + strlen("<low>"));
+		posHigh = m_Data.find("<high>", posLow);
+		nEnd = std::atoi(m_Data.data() + posHigh + strlen("<high>"));
 		if (nBeg < nEnd)
+		{
 			m_Intervals.push_back({ nBeg, nEnd });
-
-		pInterval++;
+		}
+		pos = m_Data.find("<interval>", posHigh);
+		if (std::string::npos == pos)
+			break;
 	}
-
+	std::cout << m_Data.data() << std::endl;
 }
 
-std::vector <Interval> DataReaderFromFile::getIntervals()
+const std::vector <Interval> & DataReaderFromFile::getIntervals() const
 {
 	return m_Intervals;
 }
 
 ErrCode DataReaderFromFile::readData()
 {
-	ErrCode fErr = ErrCode::READ_OK;
-	FILE *pFile;
-	errno_t errCode = fopen_s(&pFile, m_pFileName, "rb");
+	ErrCode fErr = ErrCode::m_eREAD_OK;
 
+	FILE *pFile;
+	errno_t errCode = fopen_s(&pFile, m_fileName.data(), "rb");
 	if (ENOENT == errCode)
-		fErr = ErrCode::FILE_NOT_EXIST;
+	{
+		fErr = ErrCode::m_eFILE_NOT_EXIST;
+	}
 	else if (EACCES == errCode)
-		fErr = ErrCode::FILE_NO_ACCESS;
+	{
+		fErr = ErrCode::m_eFILE_NO_ACCESS;
+	}
 	else if (0 == errCode)
 	{
 		int t = fseek(pFile, 0L, SEEK_END);
@@ -59,9 +61,19 @@ ErrCode DataReaderFromFile::readData()
 		if (fileSize > 0)
 		{
 			fseek(pFile, 0L, SEEK_SET);
-
-			try {
+			char *pData = nullptr;
+			try
+			{
 				pData = new char[fileSize]; // + 1 for 0 (EOF)?
+			}
+			catch (const std::bad_alloc & e)
+			{
+				std::cout << "Allocation failed: " << e.what() << '\n';
+				fErr = ErrCode::m_eMEM_BAD_ALLOC;
+			}
+			
+			if (ErrCode::m_eMEM_BAD_ALLOC != fErr)
+			{
 				long nSize = fread_s(pData, fileSize, sizeof(char), fileSize, pFile);
 
 				//check real size of readed data
@@ -74,22 +86,22 @@ ErrCode DataReaderFromFile::readData()
 						nRemainingSize = fileSize - nSize;
 						nPortionSize = fread_s(pData + nSize, nRemainingSize, sizeof(char), nRemainingSize, pFile);
 						nSize += nPortionSize;
-					} while (nSize < fileSize);
+					} 
+					while (nSize < fileSize);
 				}
+				m_Data.append(pData); //terminated sign????
+				delete[]pData;
 
 				if (nSize > 0)
 				{
 					parseIntervalsFromFile();
 				}
 			}
-			catch (const std::bad_alloc& e)
-			{
-				std::cout << "Allocation failed: " << e.what() << '\n';
-			}
+			
 		}
 		else
 		{
-			fErr = ErrCode::FILE_IS_EMPTY;
+			fErr = ErrCode::m_eFILE_IS_EMPTY;
 		}
 		fclose(pFile);
 	}

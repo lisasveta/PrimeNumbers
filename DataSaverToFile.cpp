@@ -4,65 +4,46 @@
 
 #include <iostream>
 #include <cstdio>
+#include <string>
 
 DataSaverToFile::DataSaverToFile()
 {
 }
 
-ErrCode DataSaverToFile::saveData(const char * pFileName, std::set<int> numbers)
+ErrCode DataSaverToFile::saveData(const std::string fileName, std::set<int> numbers) const
 {
-	ErrCode err = ErrCode::WRITE_OK;
+	ErrCode err = ErrCode::m_eWRITE_OK;
 	
-	try
+	std::string strDataToFile;
+	strDataToFile.append("<root>\n<primes>\n");
+
+	std::set<int>::iterator itEnd = numbers.end();
+	for (std::set<int>::iterator it = numbers.begin(); it != itEnd; ++it)
 	{
-		int nCountNumbers = numbers.size();
-		//calculating size for buffer to compound data for saving
-		//nCountNumbers * sizeof(int) - size in bytes for all numbers from set
-		// + nCountNumbers - for spaces between them 
-		// + 40 for tags  "<root>\n<primes>\n" and "\n</primes>\n</root>"
-		int nBuffSize = nCountNumbers * sizeof(int) + nCountNumbers + 40;
-		char *pData = new char[nBuffSize];
-
-		int ind = 0, nShift;
-		std::set<int>::iterator itEnd = numbers.end();
-		sprintf_s(pData, 20, "<root>\n<primes>\n");
-		ind = 22;
-		for (std::set<int>::iterator it = numbers.begin(); it != itEnd; ++it)
-		{
-			sprintf_s(pData + ind, sizeof(int) + 1, "%d ", *it); // 1 for space to the end
-			nShift = strlen(pData);
-			ind = nShift;
-		}
-		sprintf_s(pData + ind, 20, "\n</primes>\n</root>");
-
-		//std::cout << " " << pData << std::endl;
-
-		FILE *pFile;
-		errno_t errCode = fopen_s(&pFile, pFileName, "wb");
-		if (EACCES == errCode)
-			err = ErrCode::FILE_NO_ACCESS;
-		else if (0 == errCode)
-		{
-			size_t allDataSize = strlen(pData);
-			size_t writingDataSize = fwrite(pData, sizeof(char), allDataSize, pFile);
-			//to do: check for complete writing
-			
-			size_t nextPartSize;
-			while (writingDataSize < allDataSize)
-			{
-				nextPartSize = allDataSize - writingDataSize;
-				writingDataSize += fwrite(pData + writingDataSize, sizeof(char), nextPartSize, pFile);
-			}
-			
-			fclose(pFile);
-		}
-
-		delete[]pData;
+		strDataToFile.append(std::to_string(*it));
+		strDataToFile.append(" ");
 	}
-	catch (const std::bad_alloc& e)
+	strDataToFile.append("\n</primes>\n</root>");
+
+	//std::cout << "---------------------------------\n" << strDataToFile.data() << std::endl;
+
+	FILE *pFile;
+	errno_t errCode = fopen_s(&pFile, fileName.data(), "wb");
+	if (EACCES == errCode)
 	{
-		std::cout << "Allocation failed: " << e.what() << '\n';
-		err = ErrCode::WRITE_FAILED;
+		err = ErrCode::m_eFILE_NO_ACCESS;
+	}
+	else if (0 == errCode)
+	{
+		size_t allDataSize = strDataToFile.size();
+		size_t writingDataSize = fwrite(strDataToFile.data(), sizeof(char), strDataToFile.size(), pFile);
+		size_t nextPartSize;
+		while (writingDataSize < allDataSize) //for partial reading
+		{
+			nextPartSize = allDataSize - writingDataSize;
+			writingDataSize += fwrite(strDataToFile.data() + writingDataSize, sizeof(char), nextPartSize, pFile);
+		}
+		fclose(pFile);
 	}
 	return err;
 }

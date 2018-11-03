@@ -1,20 +1,20 @@
 #pragma once
+#include <string>
 #include "dataReader.h"
 class DataReaderFromFile :
 	public DataReader
 {
-	const char *m_pFileName;
-	char *pData;
+	const std::string m_fileName;
+	std::string m_Data;
 
 	void parseIntervalsFromFile();
-	
 
 public:
 
-	DataReaderFromFile(const char * pFileName);
+	DataReaderFromFile(const std::string fileName);
 	~DataReaderFromFile();
 
-	virtual std::vector <Interval> getIntervals();
-	virtual ErrCode readData();
+	virtual const std::vector <Interval> & getIntervals()const override;
+	virtual ErrCode readData() override;
 };
 

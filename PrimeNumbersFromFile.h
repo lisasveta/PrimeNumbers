@@ -32,9 +32,9 @@ public:
 	PrimeNumbersFromFile();
 	~PrimeNumbersFromFile();
 
-	ErrCode getDataFromFile(const char *pFileName);
+	ErrCode getDataFromFile(std::string fileName);
 	void showNumbers() const;
-	ErrCode saveToFile(const char *pFileName);
+	ErrCode saveToFile(std::string fileName);
 	
 };
 

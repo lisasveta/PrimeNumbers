@@ -91,12 +91,12 @@ DWORD PrimeNumbersFromFile::threadFunct(LPVOID lpParam)
 	return 0;
 }
 
-ErrCode PrimeNumbersFromFile::getDataFromFile(const char *pFileName)
+ErrCode PrimeNumbersFromFile::getDataFromFile(std::string fileName)
 {
 	
 	ErrCode err = ErrCode::m_eREAD_OK;
 	try {
-		m_pReader = new DataReaderFromFile(pFileName);
+		m_pReader = new DataReaderFromFile(fileName);
 	}
 	catch (const std::bad_alloc& e)
 	{
@@ -129,13 +129,13 @@ void PrimeNumbersFromFile::showNumbers() const
 	std::cout << std::endl;
 }
 
-ErrCode PrimeNumbersFromFile::saveToFile(const char *pFileName)
+ErrCode PrimeNumbersFromFile::saveToFile(std::string fileName)
 {
 	ErrCode er = ErrCode::m_eWRITE_OK;
 	m_pSaver = new DataSaverToFile;
 	if (nullptr != m_pSaver)
 	{
-		er = m_pSaver->saveData(pFileName, m_primeNumbers);
+		er = m_pSaver->saveData(fileName, m_primeNumbers);
 		delete m_pSaver;
 	}
 

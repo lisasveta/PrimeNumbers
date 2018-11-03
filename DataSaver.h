@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <set>
 #include "definitions.h"
 
@@ -8,6 +9,6 @@ public:
 	DataSaver();
 	~DataSaver();
 
-	virtual ErrCode saveData(const char * pFileName, std::set<int> numbers) = 0;
+	virtual ErrCode saveData(const std::string fileName, const std::set<int> numbers) const = 0;
 };
 

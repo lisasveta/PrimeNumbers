@@ -5,10 +5,9 @@
 
 class DataSaver
 {
-public:
-	DataSaver();
-	~DataSaver();
 
-	virtual ErrCode saveData(const std::string fileName, const std::set<int> numbers) const = 0;
+public:
+	virtual ErrCode saveData(const std::set<int> numbers) const = 0;
+	virtual ~DataSaver();
 };
 

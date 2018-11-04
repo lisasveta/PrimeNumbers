@@ -2,11 +2,3 @@
 #include "DataSaver.h"
 
 
-DataSaver::DataSaver()
-{
-}
-
-DataSaver::~DataSaver()
-{
-}
-

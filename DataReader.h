@@ -10,7 +10,7 @@ protected:
 
 public:
 	DataReader();
-	virtual ~DataReader() = 0;
+	virtual ~DataReader();
 		
 	virtual const std::vector <Interval> & getIntervals() const = 0;
 	virtual ErrCode readData() = 0;

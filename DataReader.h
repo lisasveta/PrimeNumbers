@@ -14,6 +14,7 @@ public:
 		
 	virtual const std::vector <Interval> & getIntervals() const = 0;
 	virtual ErrCode readData() = 0;
+	virtual void parseData() = 0;
 	ErrCode getReadingDataStatus() const;
 };
 

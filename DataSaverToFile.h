@@ -4,10 +4,11 @@
 class DataSaverToFile :
 	public DataSaver
 {
+	const std::string m_fileName;
 public:
-	DataSaverToFile();
-	~DataSaverToFile();
+	DataSaverToFile(const std::string fileName);
+	virtual ~DataSaverToFile();
 
-	virtual ErrCode saveData(const std::string fileName, const std::set<int> numbers)const override;
+	virtual ErrCode saveData(const std::set<int> numbers)const override;
 };
 

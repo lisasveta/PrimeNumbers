@@ -1,18 +1,17 @@
 #include "stdafx.h"
 #include "DataSaverToFile.h"
-#include "PrimeNumbers.h"
-
-#include <iostream>
-#include <cstdio>
 #include <string>
 
-DataSaverToFile::DataSaverToFile()
+DataSaverToFile::DataSaverToFile(const std::string fileName):m_fileName(fileName)
 {
 }
 
-ErrCode DataSaverToFile::saveData(const std::string fileName, std::set<int> numbers) const
+DataSaverToFile::~DataSaverToFile()
+{}
+
+ErrCode DataSaverToFile::saveData(std::set<int> numbers) const
 {
-	ErrCode err = ErrCode::m_eWRITE_OK;
+	ErrCode err = ErrCode::WRITE_OK;
 	
 	std::string strDataToFile;
 	strDataToFile.append("<root>\n<primes>\n");
@@ -24,14 +23,12 @@ ErrCode DataSaverToFile::saveData(const std::string fileName, std::set<int> numb
 		strDataToFile.append(" ");
 	}
 	strDataToFile.append("\n</primes>\n</root>");
-
-	//std::cout << "---------------------------------\n" << strDataToFile.data() << std::endl;
-
+	
 	FILE *pFile;
-	errno_t errCode = fopen_s(&pFile, fileName.data(), "wb");
+	errno_t errCode = fopen_s(&pFile, m_fileName.data(), "wb");
 	if (EACCES == errCode)
 	{
-		err = ErrCode::m_eFILE_NO_ACCESS;
+		err = ErrCode::FILE_NO_ACCESS;
 	}
 	else if (0 == errCode)
 	{
@@ -46,9 +43,4 @@ ErrCode DataSaverToFile::saveData(const std::string fileName, std::set<int> numb
 		fclose(pFile);
 	}
 	return err;
-}
-
-
-DataSaverToFile::~DataSaverToFile()
-{
 }

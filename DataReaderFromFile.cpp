@@ -1,38 +1,11 @@
 #include "stdafx.h"
 #include "DataReaderFromFile.h"
-#include <iostream>
 
 DataReaderFromFile::DataReaderFromFile(const std::string fileName):m_fileName(fileName)
 {
-
 }
-
 DataReaderFromFile::~DataReaderFromFile()
 {
-
-}
-
-
-void DataReaderFromFile::parseIntervalsFromFile()
-{
-	int nBeg(0), nEnd(0);
-
-	size_t pos = m_Data.find("<interval>"), posLow(0), posHigh(0);
-	while (pos > 0)
-	{
-		posLow = m_Data.find("<low>", pos);
-		nBeg = std::atoi(m_Data.data() + posLow + strlen("<low>"));
-		posHigh = m_Data.find("<high>", posLow);
-		nEnd = std::atoi(m_Data.data() + posHigh + strlen("<high>"));
-		if (nBeg < nEnd)
-		{
-			m_Intervals.push_back({ nBeg, nEnd });
-		}
-		pos = m_Data.find("<interval>", posHigh);
-		if (std::string::npos == pos)
-			break;
-	}
-	std::cout << m_Data.data() << std::endl;
 }
 
 const std::vector <Interval> & DataReaderFromFile::getIntervals() const
@@ -42,17 +15,17 @@ const std::vector <Interval> & DataReaderFromFile::getIntervals() const
 
 ErrCode DataReaderFromFile::readData()
 {
-	ErrCode fErr = ErrCode::m_eREAD_OK;
+	m_eReadStatus = ErrCode::READ_OK;
 
 	FILE *pFile;
 	errno_t errCode = fopen_s(&pFile, m_fileName.data(), "rb");
 	if (ENOENT == errCode)
 	{
-		fErr = ErrCode::m_eFILE_NOT_EXIST;
+		m_eReadStatus = ErrCode::FILE_NOT_EXIST;
 	}
 	else if (EACCES == errCode)
 	{
-		fErr = ErrCode::m_eFILE_NO_ACCESS;
+		m_eReadStatus = ErrCode::FILE_NO_ACCESS;
 	}
 	else if (0 == errCode)
 	{
@@ -69,10 +42,10 @@ ErrCode DataReaderFromFile::readData()
 			catch (const std::bad_alloc & e)
 			{
 				std::cout << "Allocation failed: " << e.what() << '\n';
-				fErr = ErrCode::m_eMEM_BAD_ALLOC;
+				m_eReadStatus = ErrCode::MEM_BAD_ALLOC;
 			}
 			
-			if (ErrCode::m_eMEM_BAD_ALLOC != fErr)
+			if (ErrCode::MEM_BAD_ALLOC != m_eReadStatus)
 			{
 				long nSize = fread_s(pData, fileSize, sizeof(char), fileSize, pFile);
 
@@ -89,24 +62,44 @@ ErrCode DataReaderFromFile::readData()
 					} 
 					while (nSize < fileSize);
 				}
-				m_Data.append(pData); //terminated sign????
+				m_Data.append(pData);
 				delete[]pData;
 
-				if (nSize > 0)
-				{
-					parseIntervalsFromFile();
-				}
 			}
 			
 		}
 		else
 		{
-			fErr = ErrCode::m_eFILE_IS_EMPTY;
+			m_eReadStatus = ErrCode::FILE_IS_EMPTY;
 		}
 		fclose(pFile);
 	}
-	return fErr;
+	return m_eReadStatus;
 }
 
+void DataReaderFromFile::parseData()
+{
+	if (m_Data.size() > 0)
+	{
+		int nBeg(0), nEnd(0);
+		size_t pos = m_Data.find("<interval>"), posLow(0), posHigh(0);
 
+		while (pos > 0)
+		{
+			posLow = m_Data.find("<low>", pos);
+			nBeg = std::atoi(m_Data.data() + posLow + strlen("<low>"));
+			posHigh = m_Data.find("<high>", posLow);
+			nEnd = std::atoi(m_Data.data() + posHigh + strlen("<high>"));
+			if (nBeg < nEnd)
+			{
+				m_Intervals.push_back({ nBeg, nEnd });
+			}
+			pos = m_Data.find("<interval>", posHigh);
+			if (std::string::npos == pos)
+			{
+				break;
+			}
+		}
+	}
+}
 

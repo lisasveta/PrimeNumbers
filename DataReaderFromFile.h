@@ -7,14 +7,13 @@ class DataReaderFromFile :
 	const std::string m_fileName;
 	std::string m_Data;
 
-	void parseIntervalsFromFile();
-
 public:
 
 	DataReaderFromFile(const std::string fileName);
-	~DataReaderFromFile();
-
+	virtual ~DataReaderFromFile();
+	
 	virtual const std::vector <Interval> & getIntervals()const override;
 	virtual ErrCode readData() override;
+	virtual void parseData() override;
 };
 

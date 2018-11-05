@@ -3,6 +3,7 @@
 #include <vector>
 #include "definitions.h"
 #include "windows.h"
+#include <mutex>
 
 class DataReader;
 class DataSaver;
@@ -13,9 +14,8 @@ class PrimeNumbers
 	{
 		std::set<int> * m_pPrimeNumbers;
 		Interval m_Interval;
-		HANDLE * m_phMut;
-
-		dataToThread(std::set<int> *numbers, Interval interval, HANDLE *phMut) :m_pPrimeNumbers(numbers), m_Interval(interval), m_phMut(phMut) {}
+		std::mutex *pSet_mutex;
+		dataToThread(std::set<int> *numbers, Interval interval, std::mutex *pMut) :m_pPrimeNumbers(numbers), m_Interval(interval), pSet_mutex(pMut) {}
 	};
 
 	std::set<int> m_primeNumbers;
@@ -24,9 +24,7 @@ class PrimeNumbers
 
 	void addNumbersFromIntervals(const std::vector<Interval> vc);
 	static bool isThisPrimeNumber(const int num);
-	static DWORD WINAPI threadFunct(LPVOID lpParam);
-
-
+	
 public:
 	PrimeNumbers();
 	
@@ -35,6 +33,7 @@ public:
 	void showNumbers() const;
 	ErrCode saveData(DataSaver *pSaver);
 	bool empty() const;
+	static void threadFunction(dataToThread *pData);
 	
 };
 

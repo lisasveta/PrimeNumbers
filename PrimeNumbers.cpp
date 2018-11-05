@@ -3,9 +3,8 @@
 #include "DataReaderFromFile.h"
 #include "DataSaver.h"
 #include "DataSaverToFile.h"
-
-#include <Windows.h>
 #include <mutex>
+#include <thread>
 
 #include "PrimeNumbers.h"
 
@@ -16,38 +15,32 @@ PrimeNumbers::PrimeNumbers():m_pReader(nullptr), m_pSaver(nullptr)
 
 void PrimeNumbers::addNumbersFromIntervals(std::vector<Interval> vc)
 {
-	HANDLE hMut = CreateMutexA(0, TRUE, "name"); //TRUE - main is a mutex owner
+	std::mutex set_mutex;
 
 	dataToThread * pDataTh; //data struct for thread
 	int nCountThreads = vc.size();
-	HANDLE *pHand = new HANDLE[nCountThreads]; //create array for thread handles
-
+	
+	std::thread **pThreads = new std::thread *[nCountThreads];
 	int threadInd = 0;
 	std::vector<Interval>::iterator itEnd = vc.end();
 	for (std::vector<Interval>::iterator it = vc.begin(); it != itEnd; ++it)
 	{
-		pDataTh = new dataToThread(&m_primeNumbers, { it->m_nBeg, it->m_nEnd }, &hMut); //create data struct for current thread
-		pHand[threadInd] = CreateThread(NULL, 0, threadFunct, pDataTh, 0, 0);
+		pDataTh = new dataToThread(&m_primeNumbers, { it->m_nBeg, it->m_nEnd }, &set_mutex); //create data struct for current thread
+		pThreads[threadInd] = new std::thread(threadFunction, pDataTh);
 		++threadInd;
 	}
-
-	std::cout << "Do you want release mutex?(y/n) ";
-	char cAnswer;
-	std::cin >> cAnswer;
-	if (cAnswer == 'y')
-	{
-		ReleaseMutex(hMut);
-	}
-	WaitForMultipleObjects(nCountThreads, pHand, TRUE, INFINITE);
-
+	//wait all threads
 	for (int i = 0; i < nCountThreads; ++i)
 	{
-		CloseHandle(pHand[i]);
+		pThreads[i]->join();
 	}
-	delete[] pHand;
-	CloseHandle(hMut);
-
+	for (int i = 0; i < nCountThreads; ++i)
+	{
+		delete pThreads[i];
+	}
+	delete[] pThreads;
 }
+
 bool PrimeNumbers::isThisPrimeNumber(int num)
 {
 	bool bPrimeNumber = true;
@@ -61,11 +54,11 @@ bool PrimeNumbers::isThisPrimeNumber(int num)
 	return bPrimeNumber;
 }
 
-DWORD PrimeNumbers::threadFunct(LPVOID lpParam)
+void PrimeNumbers::threadFunction(dataToThread *pData)
 {
-	dataToThread *pData = (dataToThread*)lpParam;
-	WaitForSingleObject(*(pData->m_phMut), INFINITE);
-	DWORD dwId = GetCurrentThreadId(); // or std::this_thread::get_id()
+	std::lock_guard<std::mutex> lock(*pData->pSet_mutex);
+	
+	std::thread::id dwId = std::this_thread::get_id();
 	std::cout << "Thread #" << dwId << std::endl;
 
 	for (int i = pData->m_Interval.m_nBeg; i <= pData->m_Interval.m_nEnd; ++i)
@@ -80,10 +73,8 @@ DWORD PrimeNumbers::threadFunct(LPVOID lpParam)
 	}
 	std::cout << std::endl;
 	std::cout << "*******************************************************************\n";
-	ReleaseMutex(*(pData->m_phMut));
+	
 	delete pData;
-
-	return 0;
 }
 
 ErrCode PrimeNumbers::readData(DataReader *pReader)

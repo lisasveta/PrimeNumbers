@@ -1,14 +1,17 @@
-#include "stdafx.h"
-#include "dataReader.h"
+#include "DataReader.h"
 
-DataReader::DataReader():m_eReadStatus(ErrCode::READ_OK)
-{
-}
 DataReader::~DataReader()
 {
+
 }
 
-ErrCode DataReader::getReadingDataStatus() const
+ErrCode DataReader::getReadStatus()
 {
-	return m_eReadStatus;
+    return m_eReadStatus;
 }
+
+std::vector <Interval> DataReader::getIntervals()
+{
+    return m_Intervals;
+}
+

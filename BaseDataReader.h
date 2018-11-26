@@ -6,7 +6,7 @@
 class BaseDataReader
 {
 protected:
-    std::vector <Interval> m_Intervals;
+    std::vector< Interval > m_Intervals;
     ErrCode m_eReadStatus;
 
 public:

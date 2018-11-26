@@ -4,14 +4,6 @@
 #include <iostream>
 #include "definitions.h"
 
-DataReaderFromXML::DataReaderFromXML(std::string fileName):m_fileName(fileName)
-{
-}
-
-DataReaderFromXML::~DataReaderFromXML()
-{
-}
-
 ErrCode DataReaderFromXML::readData()
 {
     m_eReadStatus = READ_OK;
@@ -87,4 +79,9 @@ void DataReaderFromXML::parseData()
             }
         }
     }
+}
+
+void DataReaderFromXML::setFileName(std::string fileName)
+{
+    m_fileName.assign(fileName);
 }

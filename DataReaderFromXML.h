@@ -10,12 +10,9 @@ class DataReaderFromXML: public DataReader
     std::string m_DataFromFile;
 
 public:
-    DataReaderFromXML(std::string fileName);
-    virtual ~DataReaderFromXML() override;
-
     virtual ErrCode readData() override;
     virtual void parseData() override;
-
+    void setFileName(std::string fileName);
 };
 
 #endif // DATAREADERFROMXML_H

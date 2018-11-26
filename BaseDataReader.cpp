@@ -1,11 +1,11 @@
-#include "DataReader.h"
+#include "BaseDataReader.h"
 
-ErrCode DataReader::getReadStatus()
+ErrCode BaseDataReader::getReadStatus()
 {
     return m_eReadStatus;
 }
 
-const std::vector< Interval >& DataReader::getIntervals()
+const std::vector< Interval >& BaseDataReader::getIntervals()
 {
     return m_Intervals;
 }

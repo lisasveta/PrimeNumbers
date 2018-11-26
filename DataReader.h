@@ -10,7 +10,7 @@ protected:
     ErrCode m_eReadStatus;
 
 public:
-    virtual ~DataReader();
+    virtual ~DataReader() = default;
 
     virtual ErrCode readData() = 0;
     virtual void parseData() = 0;

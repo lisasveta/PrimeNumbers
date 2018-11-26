@@ -1,5 +1,5 @@
-#ifndef DATAREADER_H
-#define DATAREADER_H
+#ifndef BASEDATAREADER_H
+#define BASEDATAREADER_H
 #include "definitions.h"
 #include <vector>
 
@@ -18,4 +18,4 @@ public:
     const std::vector< Interval >& getIntervals();
 };
 
-#endif // DATAREADER_H
+#endif // BASEDATAREADER_H

@@ -8,9 +8,9 @@ LIBS += -pthread
 SOURCES += main.cpp \
     DataReaderFromXML.cpp \
     DataReader.cpp \
-    DataSaver.cpp \
     DataSaverToXML.cpp \
-    PrimeNumbers.cpp
+    PrimeNumbers.cpp \
+    BaseDataReader.cpp
 
 include(deployment.pri)
 qtcAddDeployment()
@@ -21,5 +21,6 @@ HEADERS += \
     DataReader.h \
     DataSaver.h \
     DataSaverToXML.h \
-    PrimeNumbers.h
+    PrimeNumbers.h \
+    BaseDataReader.h
 

@@ -1,5 +1,5 @@
 ﻿#include <iostream>
-#include "DataReader.h"
+//#include "BaseDataReader.h"
 #include "DataReaderFromXML.h"
 #include "PrimeNumbers.h"
 #include "DataSaverToXML.h"
@@ -7,13 +7,13 @@
 
 int main()
 {
-    std::stringstream ss("somefirstnum 45 theanothenumber 67 anotherintnumber");
-    char str1[100], str2[100];
-    int nNum1, nNum2;
-    ss >> str1 >> nNum1 >> str2 >> nNum2;
-    std::cout << str1 << std::endl << nNum1 << std::endl << str2 << std::endl << nNum2 << std::endl;
+//    std::stringstream ss("somefirstnum 45 theanothenumber 67 anotherintnumber");
+//    char str1[100], str2[100];
+//    int nNum1, nNum2;
+//    ss >> str1 >> nNum1 >> str2 >> nNum2;
+//    std::cout << str1 << std::endl << nNum1 << std::endl << str2 << std::endl << nNum2 << std::endl;
 
-    return 0;
+//    return 0;
     PrimeNumbers prNumb;
     DataReaderFromXML reader;
     reader.setFileName("/home/ai/PrimeNumbers/intervals.xml");

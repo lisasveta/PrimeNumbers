@@ -10,7 +10,7 @@ ErrCode DataReader::getReadStatus()
     return m_eReadStatus;
 }
 
-std::vector <Interval> DataReader::getIntervals()
+const std::vector< Interval >& DataReader::getIntervals()
 {
     return m_Intervals;
 }

@@ -15,7 +15,7 @@ public:
     virtual ErrCode readData() = 0;
     virtual void parseData() = 0;
     ErrCode getReadStatus();
-    std::vector <Interval> getIntervals();
+    const std::vector< Interval >& getIntervals();
 };
 
 #endif // DATAREADER_H

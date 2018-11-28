@@ -7,15 +7,17 @@ class BaseDataReader
 {
 protected:
     std::vector< Interval > m_Intervals;
-    ErrCode m_eReadStatus;
+    ErrCodeRead m_eReadStatus;
 
 public:
     virtual ~BaseDataReader() = default;
 
-    virtual ErrCode readData() = 0;
+    virtual ErrCodeRead readData() = 0;
     virtual void parseData() = 0;
-    ErrCode getReadStatus();
-    const std::vector< Interval >& getIntervals();
+    ErrCodeRead getReadStatus();
+
+    const std::vector< Interval >&
+    getIntervals();
 };
 
 #endif // BASEDATAREADER_H

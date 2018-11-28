@@ -1,11 +1,12 @@
 #include "BaseDataReader.h"
 
-ErrCode BaseDataReader::getReadStatus()
+ErrCodeRead BaseDataReader::getReadStatus()
 {
     return m_eReadStatus;
 }
 
-const std::vector< Interval >& BaseDataReader::getIntervals()
+const std::vector< Interval >&
+BaseDataReader::getIntervals()
 {
     return m_Intervals;
 }

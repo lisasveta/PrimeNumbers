@@ -1,40 +1,34 @@
-#pragma once
+#ifndef PRIMENUMBERS_H
+#define PRIMENUMBERS_H
+#include "BaseDataSaver.h"
+#include "BaseDataReader.h"
 #include <set>
-#include <vector>
-#include "definitions.h"
-#include "windows.h"
+#include <mutex>
 
-class DataReader;
-class DataSaver;
+struct dataToThread
+{
+    Interval m_Interval;
+    std::mutex* m_pMutex;
+    std::set< int >& m_PrimeNumbers;
+
+    dataToThread(Interval interval, std::mutex* pMutex, std::set< int >& primeNumbers):m_Interval(interval), m_pMutex(pMutex), m_PrimeNumbers(primeNumbers){}
+};
 
 class PrimeNumbers
 {
-	struct dataToThread
-	{
-		std::set<int> * m_pPrimeNumbers;
-		Interval m_Interval;
-		HANDLE * m_phMut;
-
-		dataToThread(std::set<int> *numbers, Interval interval, HANDLE *phMut) :m_pPrimeNumbers(numbers), m_Interval(interval), m_phMut(phMut) {}
-	};
-
-	std::set<int> m_primeNumbers;
-	DataReader *m_pReader;
-	DataSaver *m_pSaver;
-
-	void addNumbersFromIntervals(const std::vector<Interval> vc);
-	static bool isThisPrimeNumber(const int num);
-	static DWORD WINAPI threadFunct(LPVOID lpParam);
-
+    std::set< int > m_primeNumbers;
+    BaseDataSaver* m_pSaver;
+    BaseDataReader* m_pReader;
+    void threadFunction(dataToThread* pData);
+    bool isPrimeNumber(int n);
 
 public:
-	PrimeNumbers();
-	
-	ErrCode readData(DataReader *pReader);
-	void parseData();
-	void showNumbers() const;
-	ErrCode saveData(DataSaver *pSaver);
-	bool empty() const;
-	
+    PrimeNumbers();
+
+    ErrCodeRead readData(BaseDataReader* pReader);
+    void parseData();
+    ErrCodeWrite saveData(BaseDataSaver* pSaver);
+    void showData();
 };
 
+#endif // PRIMENUMBERS_H

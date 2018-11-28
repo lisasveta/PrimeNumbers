@@ -1,134 +1,102 @@
-#include "stdafx.h"
-#include "DataReader.h"
-#include "DataReaderFromFile.h"
-#include "DataSaver.h"
-#include "DataSaverToFile.h"
-
-#include <Windows.h>
-#include <mutex>
-
 #include "PrimeNumbers.h"
+#include <thread>
+#include <sstream>
 
-
-PrimeNumbers::PrimeNumbers():m_pReader(nullptr), m_pSaver(nullptr)
+PrimeNumbers::PrimeNumbers():m_pSaver(nullptr), m_pReader(nullptr)
 {
 }
 
-void PrimeNumbers::addNumbersFromIntervals(std::vector<Interval> vc)
+bool PrimeNumbers::isPrimeNumber(int n)
 {
-	HANDLE hMut = CreateMutexA(0, TRUE, "name"); //TRUE - main is a mutex owner
-
-	dataToThread * pDataTh; //data struct for thread
-	int nCountThreads = vc.size();
-	HANDLE *pHand = new HANDLE[nCountThreads]; //create array for thread handles
-
-	int threadInd = 0;
-	std::vector<Interval>::iterator itEnd = vc.end();
-	for (std::vector<Interval>::iterator it = vc.begin(); it != itEnd; ++it)
-	{
-		pDataTh = new dataToThread(&m_primeNumbers, { it->m_nBeg, it->m_nEnd }, &hMut); //create data struct for current thread
-		pHand[threadInd] = CreateThread(NULL, 0, threadFunct, pDataTh, 0, 0);
-		++threadInd;
-	}
-
-	std::cout << "Do you want release mutex?(y/n) ";
-	char cAnswer;
-	std::cin >> cAnswer;
-	if (cAnswer == 'y')
-	{
-		ReleaseMutex(hMut);
-	}
-	WaitForMultipleObjects(nCountThreads, pHand, TRUE, INFINITE);
-
-	for (int i = 0; i < nCountThreads; ++i)
-	{
-		CloseHandle(pHand[i]);
-	}
-	delete[] pHand;
-	CloseHandle(hMut);
-
-}
-bool PrimeNumbers::isThisPrimeNumber(int num)
-{
-	bool bPrimeNumber = true;
-	int maxDelimiter = num / 2;
-	for (int i = 2; i < maxDelimiter; ++i)
-		if (num % i == 0)
-		{
-			bPrimeNumber = false;
-			break;
-		}
-	return bPrimeNumber;
+    bool bPrime = true;
+    int nMaxDelimiter = n/2;
+    for(int i = 2; i < nMaxDelimiter; ++i)
+    {
+        if(0 == n % nMaxDelimiter)
+        {
+            bPrime = false;
+            break;
+        }
+    }
+    return bPrime;
 }
 
-DWORD PrimeNumbers::threadFunct(LPVOID lpParam)
+void PrimeNumbers::threadFunction(dataToThread* pData)
 {
-	dataToThread *pData = (dataToThread*)lpParam;
-	WaitForSingleObject(*(pData->m_phMut), INFINITE);
-	DWORD dwId = GetCurrentThreadId(); // or std::this_thread::get_id()
-	std::cout << "Thread #" << dwId << std::endl;
-
-	for (int i = pData->m_Interval.m_nBeg; i <= pData->m_Interval.m_nEnd; ++i)
-		if (isThisPrimeNumber(i))
-			pData->m_pPrimeNumbers->insert(i);
-
-	std::cout << "data: \n";
-	std::set<int>::iterator itEnd = (pData->m_pPrimeNumbers)->end();
-	for (std::set<int>::iterator it = (pData->m_pPrimeNumbers)->begin(); it != itEnd; ++it)
-	{
-		std::cout << *it << " ";
-	}
-	std::cout << std::endl;
-	std::cout << "*******************************************************************\n";
-	ReleaseMutex(*(pData->m_phMut));
-	delete pData;
-
-	return 0;
+    for(int i = pData->m_Interval.m_nBeg; i <= pData->m_Interval.m_nEnd; ++i)
+    {
+        if(isPrimeNumber(i))
+        {
+            std::lock_guard<std::mutex> guard(*pData->m_pMutex);
+            m_primeNumbers.insert(i);
+        }
+    }
+    delete pData;
 }
 
-ErrCode PrimeNumbers::readData(DataReader *pReader)
+ErrCodeRead PrimeNumbers::readData(BaseDataReader* pReader)
 {
-	m_pReader = pReader;
-	ErrCode err = ErrCode::READ_OK;
-	err = m_pReader->readData();
-	
-	return err;
+    m_pReader = pReader;
+    ErrCodeRead err = m_pReader->readData();
+    return err;
 }
+
 void PrimeNumbers::parseData()
 {
-	if (ErrCode::READ_OK == m_pReader->getReadingDataStatus())
-	{
-		m_pReader->parseData();
-		std::vector<Interval> intervals = m_pReader->getIntervals();
-		if (!intervals.empty())
-		{
-			addNumbersFromIntervals(intervals);
-		}
-	}
+    if(READ_OK == m_pReader->getReadStatus())
+    {
+       m_pReader->parseData();
+       std::vector< Interval > data = m_pReader->getIntervals();
+       unsigned nIntervalsNumber = static_cast<unsigned>(data.size());
+       if(0 != nIntervalsNumber)
+       {
+           std::mutex mut;
+           std::thread** pThreads = new std::thread *[nIntervalsNumber];
+           for(unsigned i = 0; i < nIntervalsNumber; ++i)
+           {
+                dataToThread* pDataToThread = new dataToThread(data[i], &mut, m_primeNumbers);
+                pThreads[i] = new std::thread(&PrimeNumbers::threadFunction, this, pDataToThread);
+
+           }
+           for(unsigned i = 0; i < nIntervalsNumber; ++i)
+           {
+               pThreads[i]->join();
+           }
+           std::cout << "All threads where ending." << std::endl;
+           for(unsigned i = 0; i < nIntervalsNumber; ++i)
+           {
+               delete pThreads[i];
+           }
+           delete []pThreads;
+       }
+    }
 }
 
-void PrimeNumbers::showNumbers() const
+ErrCodeWrite PrimeNumbers::saveData(BaseDataSaver* pSaver)
 {
-	std::set<int>::iterator itEnd = m_primeNumbers.end();
-	for (std::set<int>::iterator it = m_primeNumbers.begin(); it != itEnd; ++it)
-	{
-		std::cout << *it << " ";
-	}
-	std::cout << std::endl;
+    ErrCodeWrite err = WRITE_OK;
+    m_pSaver = pSaver;
+    std::stringstream streamData;
+    streamData << "<root>\n<primes>";
+    std::set< int >::iterator itBeg = m_primeNumbers.begin();
+    std::set< int >::iterator itEnd = m_primeNumbers.end();
+    for(std::set< int >::iterator it = itBeg; it != itEnd; ++it)
+    {
+        streamData << std::to_string(*it) << " ";
+    }
+
+    streamData << "</primes>\n</root>";
+    err = m_pSaver->saveData(streamData.str());
+    return err;
 }
 
-ErrCode PrimeNumbers::saveData(DataSaver *pSaver)
+void PrimeNumbers::showData()
 {
-	ErrCode er = ErrCode::WRITE_OK;
-	m_pSaver = pSaver;
-	if (nullptr != m_pSaver)
-	{
-		er = m_pSaver->saveData(m_primeNumbers);
-	}
-	return er;
-}
-
-bool PrimeNumbers::empty() const
-{
-	return m_primeNumbers.empty();
+    std::set< int >::iterator itBeg = m_primeNumbers.begin();
+    std::set< int >::iterator itEnd = m_primeNumbers.end();
+    for(std::set< int >::iterator it = itBeg; it != itEnd; ++it)
+    {
+        std::cout << *it << " ";
+    }
+    std::cout << std::endl;
 }

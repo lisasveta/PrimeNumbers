@@ -6,8 +6,7 @@ CONFIG -= qt
 LIBS += -pthread
 
 SOURCES += main.cpp \
-    DataReaderFromXML.cpp \
-    DataReader.cpp \
+    DataReaderFromXML.cpp \   
     DataSaverToXML.cpp \
     PrimeNumbers.cpp \
     BaseDataReader.cpp
@@ -17,10 +16,9 @@ qtcAddDeployment()
 
 HEADERS += \
     definitions.h \
-    DataReaderFromXML.h \
-    DataReader.h \
-    DataSaver.h \
+    DataReaderFromXML.h \   
     DataSaverToXML.h \
     PrimeNumbers.h \
-    BaseDataReader.h
+    BaseDataReader.h \
+    BaseDataSaver.h
 

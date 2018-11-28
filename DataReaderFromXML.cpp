@@ -12,7 +12,7 @@ ErrCodeRead DataReaderFromXML::readData()
     if(nullptr != pFile)
     {
         fseek(pFile, 0L, SEEK_END);
-        size_t lFileSize = static_cast<unsigned long> (ftell(pFile));
+        size_t lFileSize = static_cast< unsigned long > (ftell(pFile));
         char* pData(nullptr);
         try
         {
@@ -40,7 +40,6 @@ ErrCodeRead DataReaderFromXML::readData()
             }
         }
         fclose(pFile);
-
     }
     else
     {
